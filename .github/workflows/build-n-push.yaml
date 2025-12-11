@@ -1,4 +1,5 @@
 name: Build and Push Train Iris Job Image
+
 on:
   push:
     tags:
@@ -45,27 +46,28 @@ jobs:
     needs: format_tag
     uses: truefoundry/github-workflows-public/.github/workflows/build.yml@main
     with:
-      image_tag: ${{ github.sha }}
       enable_public_ecr: true
       enable_jfrog: false
+      platforms: 'linux/amd64'
       extra_image_tag: |
         ${{ needs.format_tag.outputs.version_tag }}
         ${{ needs.format_tag.outputs.alt_version_tag }}
+      ecr_repository_url: 'public.ecr.aws/truefoundrycloud'
       image_artifact_name: 'train-iris-job'
-      artifactory_registry_url: 'public.ecr.aws'
-      artifactory_repository_url: 'public.ecr.aws/truefoundrycloud'
+      image_tag: ${{ github.sha }}
     secrets:
       ecr_role_arn: ${{ secrets.PUBLIC_ECR_IAM_ROLE_ARN }}
 
   push_soci_index:
     name: Push SOCI Index
-    needs: build
+    needs: [format_tag, build]
     uses: truefoundry/github-workflows-public/.github/workflows/build-and-push-soci-index.yml@main
     with:
       enable_public_ecr: true
+      platforms: 'linux/amd64'
       artifactory_registry_url: 'public.ecr.aws'
       artifactory_repository_url: 'public.ecr.aws/truefoundrycloud'
       image_artifact_name: 'train-iris-job'
-      image_tag: ${{ github.sha }}
+      image_tag: ${{ needs.format_tag.outputs.version_tag }}
     secrets:
       ecr_role_arn: ${{ secrets.PUBLIC_ECR_IAM_ROLE_ARN }}
