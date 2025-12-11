@@ -1,4 +1,4 @@
-name: Build and Push Emotion Classification Image
+name: Build and Push Train Iris Job Image
 
 on:
   push:
